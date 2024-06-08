@@ -18,6 +18,18 @@ PyMUMPS can be installed from PyPI using pip:
 pip install pymumps
 ```
 
+
+***Standard mode**:
+```bash
+python3 -m pip install .
+```
+   
+***Development mode**:
+```bash
+python3 -m pip install --user -e .
+```
+
+
 Custom build flags, e.g. to specify the MUMPS installation location,
 can be specified using `--global-option`:
 
