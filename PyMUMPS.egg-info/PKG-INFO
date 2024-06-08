@@ -1,0 +1,99 @@
+Metadata-Version: 2.1
+Name: PyMUMPS
+Version: 0.3.2
+Summary: Python bindings for MUMPS, a parallel sparse direct solver
+Home-page: http://github.com/pymumps/pymumps
+Author: Bradley M. Froehle
+Author-email: brad.froehle@gmail.com
+Maintainer: Stephan Rave
+Maintainer-email: stephan.rave@uni-muenster.de
+License: BSD
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Description-Content-Type: text/markdown
+License-File: COPYING
+Requires-Dist: mpi4py
+
+PyMUMPS: A parallel sparse direct solver
+========================================
+
+
+Requirements
+------------
+
+* [MUMPS](http://graal.ens-lyon.fr/MUMPS/)
+* [mpi4py](https://code.google.com/p/mpi4py/)
+
+
+Installation
+------------
+
+PyMUMPS can be installed from PyPI using pip:
+
+```
+pip install pymumps
+```
+
+Custom build flags, e.g. to specify the MUMPS installation location,
+can be specified using `--global-option`:
+
+```
+pip install pymumps --global-option="build_ext" \
+    --global-option="-I$MUMPS_PREFIX/include" \
+    --global-option="-L$MUMPS_PREFIX/lib" \
+```
+
+Use `python setup.py build_ext --help` to get a list of all allowed
+options.
+
+There is also conda recipe:
+
+```
+conda install -c conda-forge pymumps
+```
+
+
+Examples
+--------
+
+Centralized input & output. The sparse matrix and right hand side are
+input only on the rank 0 process. The system is solved using all
+available processes and the result is available on the rank 0 process.
+
+```python
+from mumps import DMumpsContext
+ctx = DMumpsContext()
+if ctx.myid == 0:
+    ctx.set_centralized_sparse(A)
+    x = b.copy()
+    ctx.set_rhs(x) # Modified in place
+ctx.run(job=6) # Analysis + Factorization + Solve
+ctx.destroy() # Cleanup
+```
+
+Re-use symbolic or numeric factorizations.
+
+```python
+from mumps import DMumpsContext
+ctx = DMumpsContext()
+if ctx.myid == 0:
+    ctx.set_centralized_assembled_rows_cols(A.row+1, A.col+1) # 1-based
+ctx.run(job=1) # Analysis
+
+if ctx.myid == 0:
+    ctx.set_centralized_assembled_values(A.data)
+ctx.run(job=2) # Factorization
+
+if ctx.myid == 0:
+    x = b1.copy()
+    ctx.set_rhs(x)
+ctx.run(job=3) # Solve
+
+# Reuse factorizations by running `job=3` with new right hand sides
+# or analyses by supplying new values and running `job=2` to repeat
+# the factorization process.
+```

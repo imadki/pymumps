@@ -1,0 +1,14 @@
+COPYING
+MANIFEST.in
+README.md
+pyproject.toml
+setup.py
+PyMUMPS.egg-info/PKG-INFO
+PyMUMPS.egg-info/SOURCES.txt
+PyMUMPS.egg-info/dependency_links.txt
+PyMUMPS.egg-info/requires.txt
+PyMUMPS.egg-info/top_level.txt
+examples/example.py
+examples/example_dist.py
+mumps/__init__.py
+mumps/_dmumps.pyx
